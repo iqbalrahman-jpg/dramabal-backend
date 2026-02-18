@@ -1,11 +1,15 @@
 # dramabal-backend
 
-Next.js backend bridge service.
+Next.js backend bridge service with unified product endpoints.
 
 ## Endpoints
 
-- `GET /server/list`: returns hardcoded app source list (local only, no upstream call).
-- `GET /server/:app/list`: calls upstream `GET {PARENT_API_BASE_URL}/:app/list`, maps response, then returns normalized result.
+- `GET /v1/server/list`: returns hardcoded app source list (local only).
+- `GET /v1/:app/dashboard`: product dashboard cards.
+- `GET /v1/:app/search?name=...`: product search.
+- `GET /v1/:app/detail/:id`: drama detail with episode list.
+- `GET /v1/:app/episodes/:id`: episode list for a drama id.
+- `GET /v1/:app/episode/:slug`: episode video detail (title + url).
 - `GET /health`: basic health check.
 
 ## Setup
@@ -16,38 +20,54 @@ Next.js backend bridge service.
 cp .env.example .env.local
 ```
 
-2. Update `PARENT_API_BASE_URL` and `PARENT_API_TOKEN` in `.env.local`.
+2. Update `.env.local`:
 
-3. Install dependencies and run dev server:
+- `PARENT_API_TOKEN` (required)
+- `HISHORT_API_BASE_URL` (optional, default: `https://captain.sapimu.au/hishort/api/v1`)
+
+3. Install and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Server will run at `http://localhost:3000`.
+Server runs at `http://localhost:3000`.
 
-## App source list
+## Current provider support
 
-`GET /server/list` returns:
+- Implemented: `HiShort`
+- Implemented: `MicroDrama`
+- Other apps in `/v1/server/list` currently return `501 Not Implemented` for product routes.
+
+## Normalized response shapes
+
+Card items (`dashboard` + `search`):
 
 ```json
 {
-  "items": ["HiShort", "MicroDrama", "..."],
-  "total": 24
+  "id": "5034",
+  "title": "Romance of Shanghai",
+  "thumbnail": "https://...jpg"
 }
 ```
 
-## Mapping behavior for `/server/:app/list`
-
-Upstream payload supports keys: `data`, `items`, or `results`.
-Each item is transformed into:
+Episode detail:
 
 ```json
 {
-  "id": "...",
-  "name": "...",
-  "status": "...",
-  "createdAt": "..."
+  "id": "3688_1",
+  "title": "Episode 1",
+  "url": "https://...m3u8"
+}
+```
+
+Episode list items (inside `detail` and `episodes`) include `url` as well:
+
+```json
+{
+  "id": "3688_1",
+  "number": 1,
+  "url": "https://...m3u8"
 }
 ```

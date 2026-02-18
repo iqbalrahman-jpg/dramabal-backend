@@ -1,0 +1,32 @@
+import { NextResponse } from "next/server";
+import { resolveProvider } from "@/lib/providers";
+import { handleRouteError } from "@/lib/route-error";
+
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ app: string; id: string }> }
+) {
+  const { app, id } = await context.params;
+  const { appName, provider } = resolveProvider(app);
+
+  if (!appName) {
+    return NextResponse.json({ message: "Invalid app source", app }, { status: 400 });
+  }
+
+  if (!provider) {
+    return NextResponse.json(
+      {
+        message: `${appName} is not implemented yet`,
+        app: appName
+      },
+      { status: 501 }
+    );
+  }
+
+  try {
+    const data = await provider.detail(id);
+    return NextResponse.json({ app: appName, ...data }, { status: 200 });
+  } catch (error) {
+    return handleRouteError(error, appName);
+  }
+}
