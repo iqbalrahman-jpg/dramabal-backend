@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveAppSource } from "@/lib/app-sources";
 import { UpstreamError, parentGet } from "@/lib/parent-api";
 
 type ParentListItem = {
@@ -33,17 +34,40 @@ function mapListResponse(payload: ParentListResponse) {
   };
 }
 
-export async function GET() {
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ app: string }> }
+) {
+  const { app } = await context.params;
+  const appName = resolveAppSource(app);
+
+  if (!appName) {
+    return NextResponse.json(
+      {
+        message: "Invalid app source",
+        app
+      },
+      { status: 400 }
+    );
+  }
+
   try {
-    const parentPayload = await parentGet<ParentListResponse>("list");
+    const parentPayload = await parentGet<ParentListResponse>(`${appName}/list`);
     const mapped = mapListResponse(parentPayload);
 
-    return NextResponse.json(mapped, { status: 200 });
+    return NextResponse.json(
+      {
+        app: appName,
+        ...mapped
+      },
+      { status: 200 }
+    );
   } catch (error) {
     if (error instanceof UpstreamError) {
       return NextResponse.json(
         {
           message: error.message,
+          app: appName,
           upstreamStatus: error.status,
           details: error.details
         },
@@ -51,6 +75,12 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ message: "Unhandled internal server error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: "Unhandled internal server error",
+        app: appName
+      },
+      { status: 500 }
+    );
   }
 }
