@@ -1,5 +1,6 @@
 import { resolveAppSource } from "@/lib/app-sources";
 import { HiShortProvider } from "@/lib/providers/hishort";
+import { MeloShortProvider } from "@/lib/providers/meloshort";
 import { MicroDramaProvider } from "@/lib/providers/microdrama";
 import type { ProductProvider } from "@/lib/providers/types";
 
@@ -24,6 +25,13 @@ export function resolveProvider(app: string): {
     return {
       appName,
       provider: new MicroDramaProvider()
+    };
+  }
+
+  if (appName === "MeloShort") {
+    return {
+      appName,
+      provider: new MeloShortProvider()
     };
   }
 
