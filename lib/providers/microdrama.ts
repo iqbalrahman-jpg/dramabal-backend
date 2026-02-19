@@ -194,7 +194,8 @@ export class MicroDramaProvider implements ProductProvider {
     return {
       id: slug,
       title: `Episode ${index}`,
-      url: pickVideoUrl(match?.videos ?? [])
+      url: pickVideoUrl(match?.videos ?? []),
+      subtitle: ""
     };
   }
 }

@@ -46,6 +46,10 @@ type HiShortEpisodeResponse = {
   data?: {
     title?: string;
     servers?: HiShortEpisodeServer[];
+    subtitles?: Array<{
+      lang?: string;
+      url?: string;
+    }>;
   };
 };
 
@@ -84,6 +88,25 @@ function getBaseUrl(): string {
 }
 
 export class HiShortProvider implements ProductProvider {
+  private pickSubtitle(
+    subtitles: Array<{ lang?: string; url?: string }> = []
+  ): string {
+    const usable = subtitles.filter((item) => Boolean(item.url));
+
+    if (!usable.length) {
+      return "";
+    }
+
+    const byLang = (lang: string) => usable.find((item) => (item.lang ?? "").toLowerCase() === lang);
+    const selected = byLang("id") ?? byLang("en") ?? usable[0];
+
+    if (!selected?.url) {
+      return "";
+    }
+
+    return selected.url;
+  }
+
   async dashboard() {
     const payload = await upstreamGet<HiShortHomeResponse>(`${getBaseUrl()}/home`, requireToken());
     const items = sanitizeCards(payload.data?.popular ?? []);
@@ -156,7 +179,8 @@ export class HiShortProvider implements ProductProvider {
     return {
       id: slug,
       title: data.title ?? "Untitled Episode",
-      url: firstServer?.url ?? ""
+      url: firstServer?.url ?? "",
+      subtitle: this.pickSubtitle(data.subtitles ?? [])
     };
   }
 }

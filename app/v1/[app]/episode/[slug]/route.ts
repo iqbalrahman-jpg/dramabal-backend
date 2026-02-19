@@ -31,7 +31,8 @@ export async function GET(
         app: appName,
         id: data.id,
         title: data.title,
-        url: data.url
+        url: data.url,
+        subtitle: data.subtitle ?? ""
       },
       { status: 200 }
     );

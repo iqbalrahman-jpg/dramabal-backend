@@ -21,6 +21,7 @@ export type EpisodeDetail = {
   id: string;
   title: string;
   url: string;
+  subtitle: string;
 };
 
 export interface ProductProvider {
