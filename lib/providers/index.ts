@@ -5,6 +5,7 @@ import { MeloShortProvider } from "@/lib/providers/meloshort";
 import { MicroDramaProvider } from "@/lib/providers/microdrama";
 import { SnackShortProvider } from "@/lib/providers/snackshort";
 import { StardustTVProvider } from "@/lib/providers/stardusttv";
+import { VeloloProvider } from "@/lib/providers/velolo";
 import type { ProductProvider } from "@/lib/providers/types";
 
 export function resolveProvider(app: string): {
@@ -56,6 +57,13 @@ export function resolveProvider(app: string): {
     return {
       appName,
       provider: new SnackShortProvider()
+    };
+  }
+
+  if (appName === "Velolo") {
+    return {
+      appName,
+      provider: new VeloloProvider()
     };
   }
 
