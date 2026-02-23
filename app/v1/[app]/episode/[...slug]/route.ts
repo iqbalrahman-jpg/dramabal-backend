@@ -2,11 +2,16 @@ import { NextResponse } from "next/server";
 import { resolveProvider } from "@/lib/providers";
 import { handleRouteError } from "@/lib/route-error";
 
+function normalizeParam(value: string | string[]): string {
+  return Array.isArray(value) ? value.join("/") : value;
+}
+
 export async function GET(
   _request: Request,
-  context: { params: Promise<{ app: string; id: string }> }
+  context: { params: Promise<{ app: string; slug: string | string[] }> }
 ) {
-  const { app, id } = await context.params;
+  const { app, slug } = await context.params;
+  const normalizedSlug = normalizeParam(slug);
   const { appName, provider } = resolveProvider(app);
 
   if (!appName) {
@@ -24,8 +29,18 @@ export async function GET(
   }
 
   try {
-    const data = await provider.detail(id);
-    return NextResponse.json({ app: appName, ...data }, { status: 200 });
+    const data = await provider.episode(normalizedSlug);
+
+    return NextResponse.json(
+      {
+        app: appName,
+        id: data.id,
+        title: data.title,
+        url: data.url,
+        subtitle: data.subtitle ?? ""
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return handleRouteError(error, appName);
   }

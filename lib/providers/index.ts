@@ -3,6 +3,7 @@ import { DramaWaveProvider } from "@/lib/providers/dramawave";
 import { HiShortProvider } from "@/lib/providers/hishort";
 import { MeloShortProvider } from "@/lib/providers/meloshort";
 import { MicroDramaProvider } from "@/lib/providers/microdrama";
+import { StardustTVProvider } from "@/lib/providers/stardusttv";
 import type { ProductProvider } from "@/lib/providers/types";
 
 export function resolveProvider(app: string): {
@@ -40,6 +41,13 @@ export function resolveProvider(app: string): {
     return {
       appName,
       provider: new DramaWaveProvider()
+    };
+  }
+
+  if (appName === "StardustTV") {
+    return {
+      appName,
+      provider: new StardustTVProvider()
     };
   }
 
